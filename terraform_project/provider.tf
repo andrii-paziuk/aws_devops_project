@@ -1,6 +1,5 @@
 provider "aws" {
   profile = "default"
-
 }
 
 provider "kubernetes" {
