@@ -1,0 +1,50 @@
+---
+- name: Install Kubernetes tools
+  hosts: project_ec2_instances
+  become: yes
+  tasks:
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Add Kubernetes apt key
+      shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+      args:
+        executable: /bin/bash
+
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+
+    - name: Update APT cache after adding repository
+      apt:
+        update_cache: yes
+
+    - name: Install Kubernetes packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+
+    - name: Mark Kubernetes packages on hold
+      apt:
+        name: "{{ item }}"
+        state: hold
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
